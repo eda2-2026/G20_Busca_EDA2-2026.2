@@ -320,25 +320,36 @@ function renderResults(positions) {
 
 function renderPerformance(kmpTimeValue, bruteTimeValue) {
     const maxTime = Math.max(kmpTimeValue, bruteTimeValue, 0.001);
-    const kmpWidth = Math.max(4, (kmpTimeValue / maxTime) * 100);
-    const bruteWidth = Math.max(4, (bruteTimeValue / maxTime) * 100);
+    const kmpWidth = Math.max(12, (kmpTimeValue / maxTime) * 100);
+    const bruteWidth = Math.max(12, (bruteTimeValue / maxTime) * 100);
     const speedup = bruteTimeValue / Math.max(kmpTimeValue, 0.001);
 
     elements.performancePanel.classList.remove('is-hidden');
     elements.kmpBar.style.width = `${kmpWidth}%`;
     elements.bruteBar.style.width = `${bruteWidth}%`;
 
-    elements.kmpTime.textContent = formatTime(kmpTimeValue);
-    elements.bruteTime.textContent = formatTime(bruteTimeValue);
-    elements.kmpCardTime.textContent = formatTime(kmpTimeValue);
-    elements.bruteCardTime.textContent = formatTime(bruteTimeValue);
+    // Exibir tempos nos cards e nas barras
+    const kmpStr = formatTime(kmpTimeValue);
+    const bruteStr = formatTime(bruteTimeValue);
 
+    elements.kmpTime.textContent = kmpStr;
+    elements.bruteTime.textContent = bruteStr;
+    elements.kmpCardTime.textContent = kmpStr;
+    elements.bruteCardTime.textContent = bruteStr;
+
+    // Tempo dentro das barras (via data-time para o ::after)
+    elements.kmpBar.setAttribute('data-time', kmpStr);
+    elements.bruteBar.setAttribute('data-time', bruteStr);
+
+    // Speedup com destaque visual
     if (speedup >= 1) {
+        const pct = ((1 - 1 / speedup) * 100).toFixed(0);
         elements.speedupValue.textContent = `${speedup.toFixed(1)}x faster`;
-        elements.speedupLabel.textContent = 'KMP foi mais rapido que Forca Bruta para este padrao.';
+        elements.speedupLabel.textContent = `KMP foi ${pct}% mais rápido que Força Bruta.`;
     } else {
+        const pct = ((1 - speedup) * 100).toFixed(0);
         elements.speedupValue.textContent = `${(1 / speedup).toFixed(1)}x slower`;
-        elements.speedupLabel.textContent = 'KMP nao superou Forca Bruta nesta execucao.';
+        elements.speedupLabel.textContent = `KMP foi ${pct}% mais lento que Força Bruta.`;
     }
 }
 

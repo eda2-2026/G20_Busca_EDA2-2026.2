@@ -50,13 +50,16 @@ function measureTime(fn, iterations, ...args) {
 }
 
 /**
- * Formatar tempo em ms
+ * Formatar tempo em ms com escala adaptativa
  * @param {number} ms - Tempo em milissegundos
- * @returns {string} Tempo formatado (ex: '0.002 ms', '1.500 ms')
+ * @returns {string} Tempo formatado
  */
 function formatTime(ms) {
-    if (typeof ms !== 'number' || isNaN(ms)) return '0.000 ms';
-    return ms.toFixed(3) + ' ms';
+    if (typeof ms !== 'number' || isNaN(ms)) return '0 ms';
+    if (ms < 0.001) return (ms * 1000).toFixed(1) + ' µs';
+    if (ms < 1) return ms.toFixed(3) + ' ms';
+    if (ms < 10) return ms.toFixed(2) + ' ms';
+    return ms.toFixed(1) + ' ms';
 }
 
 // Exportar funções
