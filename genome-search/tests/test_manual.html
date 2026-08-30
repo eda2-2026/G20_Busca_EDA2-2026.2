@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testes Manuais - Algoritmos de Busca DNA</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+        .test-section {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+            background-color: white;
+        }
+        .test-result.success {
+            border-left-color: #27ae60;
+            background-color: #d5f5e3;
+        }
+        .test-result.error {
+            border-left-color: #e74c3c;
+            background-color: #fadbd8;
+        }
+        .test-result.performance {
+            border-left-color: #f39c12;
+            background-color: #fdebd0;
+        }
+        .test-result.info {
+            border-left-color: #3498db;
+            background-color: #ebf5fb;
+        }
+        code {
+            background-color: #34495e;
+            color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .button:hover { background-color: #2980b9; }
+        .button.secondary { background-color: #95a5a6; }
+        .button.secondary:hover { background-color: #7f8c8d; }
+        .button.success { background-color: #27ae60; }
+        .button.success:hover { background-color: #229954; }
+        .output {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        .summary {
+            background-color: #d5f5e3;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #27ae60;
+            margin-top: 20px;
+        }
+        .summary.fail {
+            background-color: #fadbd8;
+            border-left-color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Testes Manuais - Algoritmos de Busca DNA</h1>
+
+        <div class="instructions">
+            <strong>Instruções:</strong> Abra o console do navegador (F12 → Console) para executar os testes.
+            Os resultados são exibidos aqui e no console. Cada seção pode ser executada individualmente.
+        </div>
+
+        <h2>1. Testes KMP</h2>
+        <div class="test-section">
+            <button class="button" onclick="runKMPTests()">Executar Testes KMP</button>
+            <div id="kmp-output" class="output">Clique no botão para executar os testes...</div>
+        </div>
+
+        <h2>2. Testes Força Bruta</h2>
+        <div class="test-section">
+            <button class="button" onclick="runBruteForceTests()">Executar Testes Força Bruta</button>
+            <div id="bruteforce-output" class="output">Clique no botão para executar os testes...</div>
+        </div>
+
+        <h2>3. Comparação KMP vs Força Bruta</h2>
+        <div class="test-section">
+            <button class="button" onclick="runComparisonTests()">Executar Comparação</button>
+            <div id="comparison-output" class="output">Clique no botão para executar a comparação...</div>
+        </div>
+
+        <h2>4. Testes de Performance</h2>
+        <div class="test-section">
+            <button class="button" onclick="runPerformanceTests()">Executar Performance</button>
+            <div id="performance-output" class="output">Clique no botão para executar testes de performance...</div>
+        </div>
+
+        <h2>5. Testes com Dados Reais (Genomas)</h2>
+        <div class="test-section">
+            <button class="button" onclick="runRealDataTests()">Testar com Genomas</button>
+            <div id="realdata-output" class="output">Clique no botão para testar com dados reais...</div>
+        </div>
+
+        <h2>6. Resumo Geral</h2>
+        <div class="test-section">
+            <button class="button success" onclick="runAllTests()">Executar Todos os Testes</button>
+            <button class="button secondary" onclick="clearOutputs()">Limpar Saídas</button>
+            <div id="summary-output" class="output">Clique no botão para executar todos os testes...</div>
+        </div>
+    </div>
+
+    <script src="../js/kmp.js"></script>
+    <script src="../js/forca_bruta.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+    // ============================================================
+    // UTILIDADES DE TESTE
+    // ============================================================
+
+    let totalPassed = 0;
+    let totalFailed = 0;
+    const allResults = [];
+
+    function log(outputId, message, type = 'info') {
+        const output = document.getElementById(outputId);
+        const timestamp = new Date().toLocaleTimeString();
+        const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'performance' ? '⚡' : '→';
+        output.innerHTML += `\n${prefix} [${timestamp}] ${message}`;
+        output.scrollTop = output.scrollHeight;
+
+        // Console logging
+        if (type === 'success') console.log(`✅ ${message}`);
+        else if (type === 'error') console.error(`❌ ${message}`);
+        else if (type === 'performance') console.log(`⚡ ${message}`);
+        else console.log(`→ ${message}`);
+    }
+
+    function assert(outputId, testName, condition, details = '') {
+        if (condition) {
+            totalPassed++;
+            log(outputId, `✅ PASSOU: ${testName}`, 'success');
+        } else {
+            totalFailed++;
+            log(outputId, `❌ FALHOU: ${testName}${details ? ' — ' + details : ''}`, 'error');
+        }
+        allResults.push({ name: testName, passed: condition, details });
+        return condition;
+    }
+
+    function arrayEquals(a, b) {
+        return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function clearOutputs() {
+        document.querySelectorAll('.output').forEach(el => {
+            el.innerHTML = 'Aguardando execução...';
+        });
+        totalPassed = 0;
+        totalFailed = 0;
+        allResults.length = 0;
+    }
+
+    // ============================================================
+    // SEÇÃO 1: TESTES KMP
+    // ============================================================
+
+    function runKMPTests() {
+        const outputId = 'kmp-output';
+        document.getElementById(outputId).innerHTML = '';
+        log(outputId, '═══════════════════════════════════════');
+        log(outputId, '  TESTES KMP (Knuth-Morris-Pratt)');
+        log(outputId, '═══════════════════════════════════════');
+
+        let passed = 0;
+        let total = 0;
+
+        function test(name, fn) {
+            total++;
+            try {
+                const result = fn();
+                if (result) passed++;
+            } catch (e) {
+                log(outputId, `❌ ERRO: ${name} — ${e.message}`, 'error');
+            }
+        }
+
+        // --- T1: Padrão que existe (múltiplas ocorrências) ---
+        log(outputId, '\n▸ T1: Padrão com múltiplas ocorrências');
+        test('KMP: "ATCG" em "ATCGATCGATCG"', () => {
+            const r = kmpSearch('ATCGATCGATCG', 'ATCG');
+            return assert(outputId, 'KMP: "ATCG" em "ATCGATCGATCG"', arrayEquals(r, [0, 4, 8]),
+                `obtido [${r}] esperado [0,4,8]`);
+        });
+
+        // --- T2: Padrão que não existe ---
+        log(outputId, '\n▸ T2: Padrão inexistente');
+        test('KMP: "GCTA" em "ATCGATCG"', () => {
+            const r = kmpSearch('ATCGATCG', 'GCTA');
+            return assert(outputId, 'KMP: "GCTA" em "ATCGATCG"', arrayEquals(r, []),
+                `obtido [${r}] esperado []`);
+        });
+
+        // --- T3: Padrão no início ---
+        log(outputId, '\n▸ T3: Padrão no início do texto');
+        test('KMP: padrão começa na posição 0', () => {
+            const r = kmpSearch('ATCGATCG', 'ATCG');
+            return assert(outputId, 'KMP: padrão no início (pos 0)', r[0] === 0,
+                `primeira posição: ${r[0]}`);
+        });
+
+        // --- T4: Padrão no fim ---
+        log(outputId, '\n▸ T4: Padrão no final do texto');
+        test('KMP: padrão termina no último caractere', () => {
+            const r = kmpSearch('ATCGATCGATCG', 'ATCG');
+            const lastPos = r[r.length - 1];
+            return assert(outputId, 'KMP: padrão no fim', lastPos === 8,
+                `última posição: ${lastPos}, esperado: 8`);
+        });
+
+        // --- T5: Padrão de 1 caractere ---
+        log(outputId, '\n▸ T5: Padrão de 1 caractere');
+        test('KMP: "A" em "ATCGATCG"', () => {
+            const r = kmpSearch('ATCGATCG', 'A');
+            return assert(outputId, 'KMP: "A" em "ATCGATCG"', arrayEquals(r, [0, 4]),
+                `obtido [${r}] esperado [0,4]`);
+        });
+
+        // --- T6: Padrão = texto inteiro ---
+        log(outputId, '\n▸ T6: Padrão é o texto inteiro');
+        test('KMP: padrão == texto', () => {
+            const r = kmpSearch('ATCG', 'ATCG');
+            return assert(outputId, 'KMP: padrão == texto', arrayEquals(r, [0]),
+                `obtido [${r}] esperado [0]`);
+        });
+
+        // --- T7: Padrão maior que texto ---
+        log(outputId, '\n▸ T7: Padrão maior que texto');
+        test('KMP: padrão > texto retorna vazio', () => {
+            const r = kmpSearch('AT', 'ATCG');
+            return assert(outputId, 'KMP: padrão > texto', arrayEquals(r, []),
+                `obtido [${r}] esperado []`);
+        });
+
+        // --- T8: Padrões sobrepostos ---
+        log(outputId, '\n▸ T8: Padrões sobrepostos');
+        test('KMP: "AAA" em "AAAA"', () => {
+            const r = kmpSearch('AAAA', 'AAA');
+            return assert(outputId, 'KMP: "AAA" em "AAAA"', arrayEquals(r, [0, 1]),
+                `obtido [${r}] esperado [0,1]`);
+        });
+
+        // --- T9: Texto com apenas o padrão repetido ---
+        log(outputId, '\n▸ T9: Texto = padrão repetido');
+        test('KMP: "AT" em "ATATATAT"', () => {
+            const r = kmpSearch('ATATATAT', 'AT');
+            return assert(outputId, 'KMP: "AT" em "ATATATAT"', arrayEquals(r, [0, 2, 4, 6]),
+                `obtido [${r}] esperado [0,2,4,6]`);
+        });
+
+        // --- T10: computeLPS ---
+        log(outputId, '\n▸ T10: Cálculo LPS (Longest Proper Prefix Suffix)');
+        test('KMP: LPS de "AABAACAABAA"', () => {
+            const lps = computeLPS('AABAACAABAA');
+            return assert(outputId, 'KMP: LPS correto', arrayEquals(lps, [0,1,0,1,2,0,1,2,3,4,5]),
+                `obtido [${lps}]`);
+        });
+
+        // --- T11: Texto DNA real ---
+        log(outputId, '\n▸ T11: Sequência DNA realista');
+        test('KMP: "GATTACA" em sequência longa', () => {
+            const dna = 'ATCGATCGGATTACAGCTAGATTACAATCG';
+            const r = kmpSearch(dna, 'GATTACA');
+            return assert(outputId, 'KMP: "GATTACA" encontrado', r.length > 0,
+                `posições: [${r}]`);
+        });
+
+        log(outputId, `\n─── KMP: ${passed}/${total} testes passaram ───`);
+        return { passed, total };
+    }
+
+    // ============================================================
+    // SEÇÃO 2: TESTES FORÇA BRUTA
+    // ============================================================
+
+    function runBruteForceTests() {
+        const outputId = 'bruteforce-output';
+        document.getElementById(outputId).innerHTML = '';
+        log(outputId, '═══════════════════════════════════════');
+        log(outputId, '  TESTES FORÇA BRUTA');
+        log(outputId, '═══════════════════════════════════════');
+
+        let passed = 0;
+        let total = 0;
+
+        function test(name, fn) {
+            total++;
+            try {
+                const result = fn();
+                if (result) passed++;
+            } catch (e) {
+                log(outputId, `❌ ERRO: ${name} — ${e.message}`, 'error');
+            }
+        }
+
+        // --- T1: Padrão que existe ---
+        log(outputId, '\n▸ T1: Padrão com múltiplas ocorrências');
+        test('FB: "ATCG" em "ATCGATCGATCG"', () => {
+            const r = bruteForceSearch('ATCGATCGATCG', 'ATCG');
+            return assert(outputId, 'FB: "ATCG" em "ATCGATCGATCG"', arrayEquals(r, [0, 4, 8]),
+                `obtido [${r}] esperado [0,4,8]`);
+        });
+
+        // --- T2: Padrão que não existe ---
+        log(outputId, '\n▸ T2: Padrão inexistente');
+        test('FB: "GCTA" em "ATCGATCG"', () => {
+            const r = bruteForceSearch('ATCGATCG', 'GCTA');
+            return assert(outputId, 'FB: "GCTA" em "ATCGATCG"', arrayEquals(r, []),
+                `obtido [${r}] esperado []`);
+        });
+
+        // --- T3: Padrão no início ---
+        log(outputId, '\n▸ T3: Padrão no início do texto');
+        test('FB: padrão começa na posição 0', () => {
+            const r = bruteForceSearch('ATCGATCG', 'ATCG');
+            return assert(outputId, 'FB: padrão no início (pos 0)', r[0] === 0,
+                `primeira posição: ${r[0]}`);
+        });
+
+        // --- T4: Padrão no fim ---
+        log(outputId, '\n▸ T4: Padrão no final do texto');
+        test('FB: padrão termina no último caractere', () => {
+            const r = bruteForceSearch('ATCGATCGATCG', 'ATCG');
+            const lastPos = r[r.length - 1];
+            return assert(outputId, 'FB: padrão no fim', lastPos === 8,
+                `última posição: ${lastPos}, esperado: 8`);
+        });
+
+        // --- T5: Padrão de 1 caractere ---
+        log(outputId, '\n▸ T5: Padrão de 1 caractere');
+        test('FB: "A" em "ATCGATCG"', () => {
+            const r = bruteForceSearch('ATCGATCG', 'A');
+            return assert(outputId, 'FB: "A" em "ATCGATCG"', arrayEquals(r, [0, 4]),
+                `obtido [${r}] esperado [0,4]`);
+        });
+
+        // --- T6: Padrão = texto inteiro ---
+        log(outputId, '\n▸ T6: Padrão é o texto inteiro');
+        test('FB: padrão == texto', () => {
+            const r = bruteForceSearch('ATCG', 'ATCG');
+            return assert(outputId, 'FB: padrão == texto', arrayEquals(r, [0]),
+                `obtido [${r}] esperado [0]`);
+        });
+
+        // --- T7: Padrão maior que texto (lança erro) ---
+        log(outputId, '\n▸ T7: Padrão maior que texto');
+        test('FB: padrão > texto lança erro', () => {
+            try {
+                bruteForceSearch('AT', 'ATCG');
+                return assert(outputId, 'FB: padrão > texto', false, 'deveria lançar erro');
+            } catch (e) {
+                return assert(outputId, 'FB: padrão > texto lança erro', true, e.message);
+            }
+        });
+
+        // --- T8: Padrões sobrepostos ---
+        log(outputId, '\n▸ T8: Padrões sobrepostos');
+        test('FB: "AAA" em "AAAA"', () => {
+            const r = bruteForceSearch('AAAA', 'AAA');
+            return assert(outputId, 'FB: "AAA" em "AAAA"', arrayEquals(r, [0, 1]),
+                `obtido [${r}] esperado [0,1]`);
+        });
+
+        // --- T9: Texto = padrão repetido ---
+        log(outputId, '\n▸ T9: Texto = padrão repetido');
+        test('FB: "AT" em "ATATATAT"', () => {
+            const r = bruteForceSearch('ATATATAT', 'AT');
+            return assert(outputId, 'FB: "AT" em "ATATATAT"', arrayEquals(r, [0, 2, 4, 6]),
+                `obtido [${r}] esperado [0,2,4,6]`);
+        });
+
+        // --- T10: Validação de entrada ---
+        log(outputId, '\n▸ T10: Validação de entrada');
+        test('FB: texto vazio lança erro', () => {
+            try {
+                bruteForceSearch('', 'ATCG');
+                return assert(outputId, 'FB: texto vazio', false, 'deveria lançar erro');
+            } catch (e) {
+                return assert(outputId, 'FB: texto vazio lança erro', true, e.message);
+            }
+        });
+        test('FB: padrão vazio lança erro', () => {
+            try {
+                bruteForceSearch('ATCG', '');
+                return assert(outputId, 'FB: padrão vazio', false, 'deveria lançar erro');
+            } catch (e) {
+                return assert(outputId, 'FB: padrão vazio lança erro', true, e.message);
+            }
+        });
+        test('FB: caracteres inválidos lança erro', () => {
+            try {
+                bruteForceSearch('ATCGATCG', 'XYZW');
+                return assert(outputId, 'FB: caracteres inválidos', false, 'deveria lançar erro');
+            } catch (e) {
+                return assert(outputId, 'FB: caracteres inválidos lança erro', true, e.message);
+            }
+        });
+        test('FB: parâmetros não-string lançam erro', () => {
+            try {
+                bruteForceSearch(123, 'ATCG');
+                return assert(outputId, 'FB: não-string', false, 'deveria lançar erro');
+            } catch (e) {
+                return assert(outputId, 'FB: parâmetros não-string lança erro', true, e.message);
+            }
+        });
+
+        // --- T11: Texto DNA realista ---
+        log(outputId, '\n▸ T11: Sequência DNA realista');
+        test('FB: "GATTACA" em sequência longa', () => {
+            const dna = 'ATCGATCGGATTACAGCTAGATTACAATCG';
+            const r = bruteForceSearch(dna, 'GATTACA');
+            return assert(outputId, 'FB: "GATTACA" encontrado', r.length > 0,
+                `posições: [${r}]`);
+        });
+
+        log(outputId, `\n─── Força Bruta: ${passed}/${total} testes passaram ───`);
+        return { passed, total };
+    }
+
+    // ============================================================
+    // SEÇÃO 3: COMPARAÇÃO KMP vs FORÇA BRUTA
+    // ============================================================
+
+    function runComparisonTests() {
+        const outputId = 'comparison-output';
+        document.getElementById(outputId).innerHTML = '';
+        log(outputId, '═══════════════════════════════════════');
+        log(outputId, '  COMPARAÇÃO: KMP vs FORÇA BRUTA');
+        log(outputId, '═══════════════════════════════════════');
+
+        const testCases = [
+            { text: 'ATCGATCGATCG', pattern: 'ATCG', desc: 'Ocorrências múltiplas' },
+            { text: 'ATCGATCG', pattern: 'GCTA', desc: 'Padrão inexistente' },
+            { text: 'ATCGATCGATCG', pattern: 'A', desc: 'Padrão single char' },
+            { text: 'ATCGATCGATCG', pattern: 'ATCGATCGATCG', desc: 'Padrão = texto' },
+            { text: 'AAAA', pattern: 'AAA', desc: 'Padrões sobrepostos' },
+            { text: 'ATATATAT', pattern: 'AT', desc: 'Texto repetido' },
+            { text: 'ATCGATCGGATTACAGCTAGATTACAATCG', pattern: 'GATTACA', desc: 'DNA realista' },
+            { text: 'ATCGATCGATCGATCGATCG', pattern: 'ATCGATCG', desc: 'Padrão longo' },
+        ];
+
+        let allMatch = true;
+        let matchCount = 0;
+
+        testCases.forEach((tc, i) => {
+            log(outputId, `\n▸ C${i + 1}: ${tc.desc}`);
+            const kmpResult = kmpSearch(tc.text, tc.pattern);
+            const bfResult = bruteForceSearch(tc.text, tc.pattern);
+            const match = arrayEquals(kmpResult, bfResult);
+
+            if (match) matchCount++;
+            else allMatch = false;
+
+            log(outputId, `  Texto: "${tc.text.substring(0, 30)}${tc.text.length > 30 ? '...' : ''}"`, match ? 'info' : 'error');
+            log(outputId, `  Padrão: "${tc.pattern}"`, match ? 'info' : 'error');
+            log(outputId, `  KMP:    [${kmpResult.join(', ')}]`, match ? 'success' : 'error');
+            log(outputId, `  FB:     [${bfResult.join(', ')}]`, match ? 'success' : 'error');
+            log(outputId, `  Match:  ${match ? '✅ SIM' : '❌ NÃO'}`, match ? 'success' : 'error');
+
+            assert(outputId, `Comparação C${i + 1}: ${tc.desc}`, match,
+                `KMP=[${kmpResult}] FB=[${bfResult}]`);
+        });
+
+        log(outputId, `\n─── Comparação: ${matchCount}/${testCases.length} cenários idênticos ───`);
+
+        if (allMatch) {
+            log(outputId, '\n✅ CONCLUSÃO: KMP e Força Bruta retornam os mesmos resultados em todos os cenários!', 'success');
+        } else {
+            log(outputId, '\n❌ ALERTA: Existem diferenças entre KMP e Força Bruta!', 'error');
+        }
+
+        return { matchCount, total: testCases.length };
+    }
+
+    // ============================================================
+    // SEÇÃO 4: TESTES DE PERFORMANCE
+    // ============================================================
+
+    function runPerformanceTests() {
+        const outputId = 'performance-output';
+        document.getElementById(outputId).innerHTML = '';
+        log(outputId, '═══════════════════════════════════════');
+        log(outputId, '  TESTES DE PERFORMANCE');
+        log(outputId, '═══════════════════════════════════════');
+
+        function generateDNA(length) {
+            const bases = ['A', 'T', 'C', 'G'];
+            let dna = '';
+            for (let i = 0; i < length; i++) {
+                dna += bases[Math.floor(Math.random() * 4)];
+            }
+            return dna;
+        }
+
+        const sizes = [
+            { textLen: 1000, patternLen: 4, label: 'Pequeno (1K)' },
+            { textLen: 10000, patternLen: 6, label: 'Médio (10K)' },
+            { textLen: 100000, patternLen: 8, label: 'Grande (100K)' },
+            { textLen: 500000, patternLen: 10, label: 'Muito Grande (500K)' },
+        ];
+
+        const speedups = [];
+
+        sizes.forEach((size, i) => {
+            log(outputId, `\n▸ Teste ${i + 1}: ${size.label}`);
+
+            const text = generateDNA(size.textLen);
+            const pattern = text.substring(Math.floor(size.textLen / 2), Math.floor(size.textLen / 2) + size.patternLen);
+
+            // Warmup
+            kmpSearch(text.substring(0, 1000), pattern.substring(0, Math.min(4, pattern.length)));
+            bruteForceSearch(text.substring(0, 1000), pattern.substring(0, Math.min(4, pattern.length)));
+
+            // KMP: rodar 10 vezes e pegar a mediana
+            const kmpTimes = [];
+            let kmpResult;
+            for (let r = 0; r < 10; r++) {
+                const t = measureTime(kmpSearch, text, pattern);
+                kmpTimes.push(t.time);
+                kmpResult = t.result;
+            }
+            kmpTimes.sort((a, b) => a - b);
+            const kmpMedian = kmpTimes[4]; // mediana
+
+            // Força Bruta: rodar 10 vezes e pegar a mediana
+            const bfTimes = [];
+            let bfResult;
+            for (let r = 0; r < 10; r++) {
+                const t = measureTime(bruteForceSearch, text, pattern);
+                bfTimes.push(t.time);
+                bfResult = t.result;
+            }
+            bfTimes.sort((a, b) => a - b);
+            const bfMedian = bfTimes[4];
+
+            const speedup = bfMedian / kmpMedian;
+            speedups.push(speedup);
+
+            log(outputId, `  Texto: ${size.textLen.toLocaleString()} chars | Padrão: ${size.patternLen} chars`);
+            log(outputId, `  KMP:           ${formatTime(kmpMedian)} (mediana de 10)`, 'performance');
+            log(outputId, `  Força Bruta:   ${formatTime(bfMedian)} (mediana de 10)`, 'performance');
+            log(outputId, `  Speedup:       ${speedup.toFixed(2)}x`, speedup > 1 ? 'success' : 'error');
+            log(outputId, `  Resultados iguais: ${arrayEquals(kmpResult, bfResult) ? '✅' : '❌'}`,
+                arrayEquals(kmpResult, bfResult) ? 'success' : 'error');
+        });
+
+        // Resumo
+        log(outputId, '\n═══════════════════════════════════════');
+        log(outputId, '  RESUMO DE PERFORMANCE');
+        log(outputId, '═══════════════════════════════════════');
+
+        const avgSpeedup = speedups.reduce((a, b) => a + b, 0) / speedups.length;
+        log(outputId, `Speedups: ${speedups.map(s => s.toFixed(2) + 'x').join(', ')}`, 'performance');
+        log(outputId, `Speedup médio: ${avgSpeedup.toFixed(2)}x`, avgSpeedup > 1 ? 'success' : 'error');
+
+        if (avgSpeedup > 1) {
+            log(outputId, '\n✅ KMP é consistentemente mais rápido que Força Bruta!', 'success');
+        } else {
+            log(outputId, '\n⚠️ KMP não mostrou vantagem (dados pequenos podem não revelar diferença)', 'performance');
+        }
+
+        return { avgSpeedup, speedups };
+    }
+
+    // ============================================================
+    // SEÇÃO 5: TESTES COM DADOS REAIS
+    // ============================================================
+
+    function runRealDataTests() {
+        const outputId = 'realdata-output';
+        document.getElementById(outputId).innerHTML = '';
+        log(outputId, '═══════════════════════════════════════');
+        log(outputId, '  TESTES COM DADOS REAIS (GENOMAS)');
+        log(outputId, '═══════════════════════════════════════');
+
+        // Sequências biologicamente relevantes
+        const genes = [
+            { name: 'Gene TP53 (início)', seq: 'ATGGAGGAGCCGCAGTCAGATCCTAGCGT', pattern: 'ATGGAGGAG' },
+            { name: 'Promotor TATA', seq: 'GCGCGTATAAAATGGATCCCCGGG', pattern: 'TATAAA' },
+            { name: 'Sequência codificante', seq: 'ATGAAACCCGAACTGGAAC', pattern: 'ATGAAACCC' },
+            { name: 'Repetição simples', seq: 'CACACACACACACACACACACA', pattern: 'CACACA' },
+            { name: 'Pattern poli-A', seq: 'GGGGAAAAAAAAAAGGGG', pattern: 'AAAAAAAAAA' },
+        ];
+
+        genes.forEach((gene, i) => {
+            log(outputId, `\n▸ Genoma ${i + 1}: ${gene.name}`);
+            log(outputId,  `  Sequência: "${gene.seq}"`);
+            log(outputId,  `  Padrão:    "${gene.pattern}"`);
+
+            const kmpResult = kmpSearch(gene.seq, gene.pattern);
+            const bfResult = bruteForceSearch(gene.seq, gene.pattern);
+            const match = arrayEquals(kmpResult, bfResult);
+
+            log(outputId, `  KMP: [${kmpResult.join(', ')}]`, 'success');
+            log(outputId, `  FB:  [${bfResult.join(', ')}]`, 'success');
+            log(outputId, `  Iguais: ${match ? '✅' : '❌'}`, match ? 'success' : 'error');
+
+            assert(outputId, `Genoma ${i + 1}: ${gene.name}`, match);
+        });
+
+        // Teste com genoma sintético grande
+        log(outputId, '\n▸ Genoma sintético grande (200K chars)');
+        const syntheticDNA = 'ATCG'.repeat(25000) + 'GCTA'.repeat(25000);
+        const synthKMP = measureTime(kmpSearch, syntheticDNA, 'ATCG');
+        const synthBF = measureTime(bruteForceSearch, syntheticDNA, 'ATCG');
+
+        log(outputId,  `  Tamanho: ${syntheticDNA.length.toLocaleString()} chars`);
+        log(outputId,  `  KMP: ${synthKMP.result.length} ocorrências em ${formatTime(synthKMP.time)}`, 'performance');
+        log(outputId,  `  FB:  ${synthBF.result.length} ocorrências em ${formatTime(synthBF.time)}`, 'performance');
+        log(outputId,  `  Speedup: ${(synthBF.time / synthKMP.time).toFixed(2)}x`, 'success');
+
+        const synthMatch = arrayEquals(synthKMP.result, synthBF.result);
+        assert(outputId, 'Genoma sintético: resultados iguais', synthMatch);
+
+        log(outputId, '\n═══════════════════════════════════════');
+        log(outputId, '  TESTES COM DADOS REAIS CONCLUÍDOS');
+        log(outputId, '═══════════════════════════════════════');
+    }
+
+    // ============================================================
+    // SEÇÃO 6: EXECUTAR TODOS
+    // ============================================================
+
+    function runAllTests() {
+        clearOutputs();
+        const summaryId = 'summary-output';
+        document.getElementById(summaryId).innerHTML = '';
+
+        log(summaryId, '═══════════════════════════════════════');
+        log(summaryId, '  EXECUTANDO TODOS OS TESTES');
+        log(summaryId, '═══════════════════════════════════════');
+
+        totalPassed = 0;
+        totalFailed = 0;
+        allResults.length = 0;
+
+        const r1 = runKMPTests();
+        const r2 = runBruteForceTests();
+        const r3 = runComparisonTests();
+        const r4 = runPerformanceTests();
+
+        log(summaryId, '\n═══════════════════════════════════════');
+        log(summaryId, '  RESUMO FINAL');
+        log(summaryId, '═══════════════════════════════════════');
+        log(summaryId, `  KMP:          ${r1.passed}/${r1.total} passaram`);
+        log(summaryId, `  Força Bruta:  ${r2.passed}/${r2.total} passaram`);
+        log(summaryId, `  Comparação:   ${r3.matchCount}/${r3.total} idênticos`);
+        log(summaryId, `  Speedup médio: ${r4.avgSpeedup.toFixed(2)}x`);
+
+        if (totalFailed === 0) {
+            log(summaryId, '\n✅ TODOS OS TESTES PASSARAM!', 'success');
+        } else {
+            log(summaryId, `\n❌ ${totalFailed} teste(s) falharam`, 'error');
+        }
+    }
+    </script>
+</body>
+</html>

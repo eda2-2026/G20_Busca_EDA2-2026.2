@@ -1,0 +1,8 @@
+.opencode
+.env
+
+# Genome Search
+genome-search/node_modules/
+genome-search/.DS_Store
+*.mp4
+*.pdf
