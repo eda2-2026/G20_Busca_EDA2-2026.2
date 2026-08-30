@@ -17,16 +17,36 @@ function isValidDNA(sequence) {
 }
 
 /**
- * Medir tempo de execução
+ * Medir tempo de execução com warmup e múltiplas execuções
  * @param {Function} fn - Função a medir
+ * @param {number} iterations - Número de iterações (default: 5)
  * @param {...*} args - Argumentos da função
- * @returns {{ result: *, time: number }} Resultado e tempo em ms
+ * @returns {{ result: *, time: number }} Resultado e mediana dos tempos em ms
  */
-function measureTime(fn, ...args) {
-    const start = performance.now();
-    const result = fn(...args);
-    const end = performance.now();
-    return { result, time: end - start };
+function measureTime(fn, iterations, ...args) {
+    if (typeof iterations !== 'number' || iterations < 1) {
+        iterations = 5;
+    }
+
+    // Warmup: executar 3 vezes para aquecer o JIT
+    for (let w = 0; w < 3; w++) {
+        fn(...args);
+    }
+
+    // Medir múltiplas vezes e pegar a mediana
+    const times = [];
+    let result;
+
+    for (let i = 0; i < iterations; i++) {
+        const start = performance.now();
+        result = fn(...args);
+        const end = performance.now();
+        times.push(end - start);
+    }
+
+    times.sort((a, b) => a - b);
+    const median = times[Math.floor(times.length / 2)];
+    return { result, time: median };
 }
 
 /**

@@ -69,8 +69,8 @@ function bruteForceSearch(text, pattern) {
     const n = text.length;
     const m = pattern.length;
 
-    // Normalizar para maiúsculas para comparação case-insensitive
-    const textUpper = text.toUpperCase();
+    // DNA já vem em maiúsculas do cleanDNA(), mas normalizar por segurança
+    const textUpper = text.length < 100000 ? text.toUpperCase() : text;
     const patternUpper = pattern.toUpperCase();
 
     // Percorrer cada posição possível no texto

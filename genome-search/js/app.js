@@ -357,8 +357,8 @@ async function handleSearch(event) {
     await new Promise(function (resolve) {
         setTimeout(function () {
             try {
-                const kmpMeasurement = measureTime(kmpSearch, state.genome, state.pattern);
-                const bruteMeasurement = measureTime(bruteForceSearch, state.genome, state.pattern);
+                const kmpMeasurement = measureTime(kmpSearch, 5, state.genome, state.pattern);
+                const bruteMeasurement = measureTime(bruteForceSearch, 5, state.genome, state.pattern);
 
                 state.results = kmpMeasurement.result;
                 state.performance = {
