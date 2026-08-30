@@ -186,6 +186,7 @@ input[type="text"] {
 
 input[type="text"]:focus {
     border-color: var(--accent-2);
+    box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.25);
 }
 
 button {
@@ -196,6 +197,21 @@ button {
     cursor: pointer;
     font-weight: 700;
     text-transform: uppercase;
+    transition: background-color 160ms ease, transform 100ms ease;
+}
+
+button:hover:not(:disabled) {
+    background: #00d488;
+    transform: translateY(-1px);
+}
+
+button:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+}
+
+button:active:not(:disabled) {
+    transform: translateY(0);
 }
 
 button:disabled {
@@ -439,6 +455,58 @@ button:disabled {
     color: var(--muted);
     font-size: 0.8rem;
     text-align: center;
+}
+
+/* ============================================================
+   ANIMAÇÕES
+   ============================================================ */
+
+/* DNA helix background - movimento sutil nas linhas diagonais */
+@keyframes dna-shift {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 60px 0, -40px 0; }
+}
+
+body {
+    animation: dna-shift 12s linear infinite;
+    background-size: 60px 60px, 40px 40px;
+}
+
+/* Pulse no genoma quando há matches */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(0, 240, 154, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(0, 240, 154, 0.9); }
+}
+
+.base.match {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Slide-in para painéis de resultados */
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-panel,
+.performance-panel {
+    animation: slide-in 300ms ease-out;
+}
+
+/* Speedup card pulse */
+@keyframes speedup-pulse {
+    0%, 100% { border-color: var(--accent); }
+    50% { border-color: var(--accent-2); }
+}
+
+.speedup-card {
+    animation: speedup-pulse 3s ease-in-out infinite;
 }
 
 @media (max-width: 640px) {
