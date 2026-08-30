@@ -1,3 +1,262 @@
 /* Genome Search - Design System */
 
-/* TODO: Implementar na Issue #3 (CSS) */
+:root {
+    --bg: #07111f;
+    --panel: #15223d;
+    --panel-dark: #0b1729;
+    --line: #244164;
+    --accent: #00f09a;
+    --accent-2: #00a3ff;
+    --text: #e7eef8;
+    --muted: #8fa1ba;
+    --danger: #ff6680;
+    --success: #63f5b5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text);
+    background:
+        linear-gradient(108deg, transparent 0 31%, rgba(0, 240, 154, 0.2) 31.1% 31.25%, transparent 31.35%),
+        linear-gradient(101deg, transparent 0 55%, rgba(0, 163, 255, 0.12) 55.1% 55.25%, transparent 55.35%),
+        var(--bg);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.app-shell {
+    width: min(880px, calc(100vw - 32px));
+    margin: 32px auto;
+    padding: 24px;
+    border: 1px solid var(--accent-2);
+    background: rgba(7, 17, 31, 0.94);
+}
+
+.app-header {
+    padding: 8px 0 28px;
+    text-align: center;
+}
+
+.eyebrow {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-align: left;
+}
+
+h1,
+h2,
+p {
+    margin: 0;
+}
+
+h1 {
+    font-size: clamp(2rem, 5vw, 3.3rem);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+h1 span {
+    color: var(--accent);
+}
+
+.app-header p:last-child {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.panel {
+    padding: 20px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+}
+
+.panel + .panel {
+    margin-top: 18px;
+}
+
+.search-panel {
+    border-color: var(--accent);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+.section-title h2 {
+    font-size: 0.92rem;
+    letter-spacing: 0;
+}
+
+.upload-zone {
+    display: grid;
+    min-height: 142px;
+    place-items: center;
+    padding: 24px;
+    border: 1px dashed var(--line);
+    background: rgba(11, 23, 41, 0.45);
+    color: var(--muted);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.upload-zone:hover,
+.upload-zone.is-dragging {
+    border-color: var(--accent-2);
+    background: rgba(0, 163, 255, 0.1);
+}
+
+.upload-zone input {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.upload-icon {
+    display: grid;
+    width: 54px;
+    height: 34px;
+    place-items: center;
+    margin-bottom: 14px;
+    border: 1px solid var(--muted);
+    color: var(--text);
+    font-size: 0.68rem;
+}
+
+.upload-zone strong {
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+.upload-zone small {
+    margin-top: 8px;
+    font-size: 0.78rem;
+}
+
+.file-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    color: var(--success);
+    font-size: 0.9rem;
+}
+
+.file-info span {
+    padding: 7px 10px;
+    border: 1px solid rgba(99, 245, 181, 0.35);
+    background: rgba(99, 245, 181, 0.08);
+}
+
+.is-hidden {
+    display: none;
+}
+
+.search-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 132px;
+    gap: 12px;
+}
+
+input[type="text"] {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    background: var(--panel-dark);
+    color: var(--text);
+    font-family: "Courier New", monospace;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    outline: none;
+}
+
+input[type="text"]:focus {
+    border-color: var(--accent-2);
+}
+
+button {
+    min-height: 46px;
+    border: 0;
+    background: var(--accent);
+    color: #03130d;
+    cursor: pointer;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+button:disabled {
+    background: #2b3b4f;
+    color: #7b8ca3;
+    cursor: not-allowed;
+}
+
+.feedback {
+    min-height: 20px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
+.feedback.error {
+    color: var(--danger);
+}
+
+.feedback.success,
+.feedback.result {
+    color: var(--success);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.app-footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(36, 65, 100, 0.7);
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    .app-shell {
+        width: min(100vw - 18px, 880px);
+        margin: 9px auto;
+        padding: 14px;
+    }
+
+    .panel {
+        padding: 16px;
+    }
+
+    .search-row {
+        grid-template-columns: 1fr;
+    }
+
+    button {
+        width: 100%;
+    }
+}

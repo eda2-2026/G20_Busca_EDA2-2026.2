@@ -7,9 +7,60 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- TODO: Implementar na Issue #4 (HTML) -->
-    <h1>Genome Search</h1>
-    <p>Busca em Genoma com KMP</p>
+    <main class="app-shell">
+        <header class="app-header">
+            <p class="eyebrow">Genome Search - EDA2</p>
+            <h1><span>Genome</span>Search</h1>
+            <p>KMP Pattern Matching Algorithm - EDA2 2026.2</p>
+        </header>
+
+        <section class="panel" aria-labelledby="upload-title">
+            <div class="section-title">
+                <span aria-hidden="true">[+]</span>
+                <h2 id="upload-title">Upload Genome</h2>
+            </div>
+
+            <label class="upload-zone" id="upload-zone" for="genome-file">
+                <input id="genome-file" type="file" accept=".txt,text/plain">
+                <span class="upload-icon" aria-hidden="true">FILE</span>
+                <strong>Drag and drop your .txt file here or click to select</strong>
+                <small>Supported format: .txt (DNA sequences: A, T, C, G)</small>
+            </label>
+
+            <div class="file-info is-hidden" id="file-info" aria-live="polite">
+                <span id="file-name"></span>
+                <span id="file-size"></span>
+            </div>
+            <p class="feedback" id="file-feedback" aria-live="polite"></p>
+        </section>
+
+        <section class="panel search-panel" aria-labelledby="search-title">
+            <div class="section-title">
+                <span aria-hidden="true">?</span>
+                <h2 id="search-title">Search</h2>
+            </div>
+
+            <form id="search-form" novalidate>
+                <div class="search-row">
+                    <label class="sr-only" for="pattern-input">DNA pattern</label>
+                    <input
+                        id="pattern-input"
+                        type="text"
+                        autocomplete="off"
+                        spellcheck="false"
+                        placeholder="Enter DNA pattern (e.g., ATCG)"
+                    >
+                    <button id="search-button" type="submit" disabled>Search</button>
+                </div>
+                <p class="feedback" id="pattern-feedback" aria-live="polite"></p>
+                <p class="feedback result" id="search-feedback" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <footer class="app-footer">
+            Desenvolvido por G20 - Estrutura de Dados 2 - 2026.2
+        </footer>
+    </main>
 
     <!-- Scripts -->
     <script src="js/utils.js"></script>
