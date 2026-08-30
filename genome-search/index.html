@@ -34,7 +34,10 @@
             <p class="feedback" id="file-feedback" aria-live="polite"></p>
         </section>
 
-        <section class="panel search-panel" aria-labelledby="search-title">
+        <section class="panel search-panel" id="search-panel" aria-labelledby="search-title">
+            <div class="loading-overlay" id="search-overlay" aria-live="polite">
+                <span class="spinner"></span> Buscando padrão no genoma...
+            </div>
             <div class="section-title">
                 <span aria-hidden="true">?</span>
                 <h2 id="search-title">Search</h2>

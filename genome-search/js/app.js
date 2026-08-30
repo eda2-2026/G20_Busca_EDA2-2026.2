@@ -26,6 +26,8 @@ function getElements() {
     elements.searchFeedback = document.getElementById('search-feedback');
     elements.searchButton = document.getElementById('search-button');
     elements.searchForm = document.getElementById('search-form');
+    elements.searchPanel = document.getElementById('search-panel');
+    elements.searchOverlay = document.getElementById('search-overlay');
     elements.resultsPanel = document.getElementById('results-panel');
     elements.performancePanel = document.getElementById('performance-panel');
     elements.genomeView = document.getElementById('genome-view');
@@ -54,8 +56,15 @@ function formatSize(size) {
 
 function setFeedback(element, message, type = '') {
     element.textContent = message;
-    element.classList.remove('error', 'success');
+    element.classList.remove('error', 'success', 'warning');
     if (type) element.classList.add(type);
+}
+
+function setLoadingState(isLoading) {
+    document.body.classList.toggle('is-loading', isLoading);
+    if (elements.searchButton) {
+        elements.searchButton.disabled = isLoading;
+    }
 }
 
 function clearResults() {
@@ -124,14 +133,29 @@ function showFileInfo(file, genome) {
 function loadGenomeFile(file) {
     if (!file) return;
 
+    // Validação de extensão do arquivo
+    const fileName = file.name || '';
+    const extension = fileName.split('.').pop().toLowerCase();
+    if (extension !== 'txt') {
+        setFeedback(
+            elements.fileFeedback,
+            'Formato inválido. Use apenas arquivos .txt.',
+            'error'
+        );
+        return;
+    }
+
     const reader = new FileReader();
-    setFeedback(elements.fileFeedback, 'Lendo arquivo...');
+    // Mostrar spinner durante leitura
+    setFeedback(elements.fileFeedback, '', '');
+    elements.fileFeedback.innerHTML = '<span class="spinner"></span> Lendo arquivo...';
     elements.searchButton.disabled = true;
 
     reader.onload = function onLoad(event) {
-        const genome = cleanDNA(event.target.result || '');
+        const raw = event.target.result || '';
+        const cleaned = raw.toUpperCase().replace(/\s/g, '');
 
-        if (!genome) {
+        if (!cleaned) {
             state.genome = '';
             state.fileName = '';
             clearResults();
@@ -141,25 +165,26 @@ function loadGenomeFile(file) {
             return;
         }
 
-        if (!/^[ATCG]+$/.test(genome)) {
-            state.genome = '';
-            state.fileName = '';
-            clearResults();
-            elements.fileInfo.classList.add('is-hidden');
-            setFeedback(
-                elements.fileFeedback,
-                'O genoma contém caracteres inválidos. Use apenas A, T, C e G.',
-                'error'
-            );
-            updateSearchState();
-            return;
-        }
+        // Contar caracteres inválidos
+        const invalidCount = (cleaned.match(/[^ATCG]/g) || []).length;
+        // Remover caracteres inválidos, manter apenas A, T, C, G
+        const genome = cleaned.replace(/[^ATCG]/g, '');
 
         state.genome = genome;
         state.fileName = file.name;
         clearResults();
         showFileInfo(file, genome);
-        setFeedback(elements.fileFeedback, 'Genoma carregado com sucesso.', 'success');
+
+        if (invalidCount > 0) {
+            setFeedback(
+                elements.fileFeedback,
+                `${invalidCount} caracteres inválidos foram removidos. Apenas A, T, C, G são permitidos.`,
+                'warning'
+            );
+        } else {
+            setFeedback(elements.fileFeedback, 'Genoma carregado com sucesso.', 'success');
+        }
+
         setFeedback(elements.searchFeedback, '');
         updateSearchState();
     };
@@ -317,30 +342,57 @@ function renderPerformance(kmpTimeValue, bruteTimeValue) {
     }
 }
 
-function handleSearch(event) {
+async function handleSearch(event) {
     event.preventDefault();
 
     if (elements.searchButton.disabled) return;
 
-    const kmpMeasurement = measureTime(kmpSearch, state.genome, state.pattern);
-    const bruteMeasurement = measureTime(bruteForceSearch, state.genome, state.pattern);
+    // Ativar estado de loading
+    setLoadingState(true);
+    if (elements.searchOverlay) {
+        elements.searchOverlay.style.display = 'grid';
+    }
 
-    state.results = kmpMeasurement.result;
-    state.performance = {
-        kmp: kmpMeasurement.time,
-        bruteForce: bruteMeasurement.time
-    };
+    // Usar setTimeout para permitir que o DOM atualize antes de executar a busca
+    await new Promise(function (resolve) {
+        setTimeout(function () {
+            try {
+                const kmpMeasurement = measureTime(kmpSearch, state.genome, state.pattern);
+                const bruteMeasurement = measureTime(bruteForceSearch, state.genome, state.pattern);
 
-    renderResults(state.results);
-    renderPerformance(state.performance.kmp, state.performance.bruteForce);
+                state.results = kmpMeasurement.result;
+                state.performance = {
+                    kmp: kmpMeasurement.time,
+                    bruteForce: bruteMeasurement.time
+                };
 
-    setFeedback(
-        elements.searchFeedback,
-        state.results.length > 0
-            ? `Busca concluida: ${state.results.length.toLocaleString('pt-BR')} ocorrencia(s) encontrada(s).`
-            : 'Busca concluida: padrao nao encontrado.',
-        'success'
-    );
+                renderResults(state.results);
+                renderPerformance(state.performance.kmp, state.performance.bruteForce);
+
+                setFeedback(
+                    elements.searchFeedback,
+                    state.results.length > 0
+                        ? `Busca concluída: ${state.results.length.toLocaleString('pt-BR')} ocorrência(s) encontrada(s).`
+                        : 'Busca concluída: padrão não encontrado.',
+                    'success'
+                );
+            } catch (err) {
+                setFeedback(
+                    elements.searchFeedback,
+                    'Erro durante a busca: ' + err.message,
+                    'error'
+                );
+            }
+
+            // Desativar estado de loading
+            setLoadingState(false);
+            if (elements.searchOverlay) {
+                elements.searchOverlay.style.display = 'none';
+            }
+
+            resolve();
+        }, 50);
+    });
 }
 
 function bindEvents() {

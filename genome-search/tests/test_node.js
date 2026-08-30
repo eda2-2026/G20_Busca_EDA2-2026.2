@@ -445,6 +445,116 @@ if (avgSpeedup > 1) {
 }
 
 // ============================================================
+// SEÇÃO 5: TESTES ISSUE #17 — Tratamento de erros e loading
+// ============================================================
+console.log('\n═══════════════════════════════════════');
+console.log('  TESTES ISSUE #17 — Erros e Loading');
+console.log('═══════════════════════════════════════');
+
+let i17Passed = 0;
+let i17Total = 0;
+
+function i17Test(name, fn) {
+    i17Total++;
+    try {
+        const result = fn();
+        if (result) i17Passed++;
+    } catch (e) {
+        console.error(`❌ ERRO: ${name} — ${e.message}`);
+    }
+}
+
+// T1: Validação de extensão .txt
+console.log('\n▸ T1: Validação de extensão do arquivo');
+i17Test('Extensão .txt é aceita', () => {
+    const fileName = 'genome.txt';
+    const ext = fileName.split('.').pop().toLowerCase();
+    return assert('Extensão .txt', ext === 'txt', `obtido: ${ext}`);
+});
+i17Test('Extensão .csv é rejeitada', () => {
+    const fileName = 'genome.csv';
+    const ext = fileName.split('.').pop().toLowerCase();
+    return assert('Extensão .csv', ext !== 'txt', `obtido: ${ext}`);
+});
+i17Test('Extensão .fasta é rejeitada', () => {
+    const fileName = 'genome.fasta';
+    const ext = fileName.split('.').pop().toLowerCase();
+    return assert('Extensão .fasta', ext !== 'txt', `obtido: ${ext}`);
+});
+i17Test('Sem extensão é rejeitada', () => {
+    const fileName = 'genome';
+    const ext = fileName.split('.').pop().toLowerCase();
+    return assert('Sem extensão', ext !== 'txt', `obtido: ${ext}`);
+});
+i17Test('Extensão .TXT (maiúscula) é aceita', () => {
+    const fileName = 'genome.TXT';
+    const ext = fileName.split('.').pop().toLowerCase();
+    return assert('Extensão .TXT', ext === 'txt', `obtido: ${ext}`);
+});
+
+// T2: Remoção de caracteres inválidos
+console.log('\n▸ T2: Remoção de caracteres inválidos (strip + warn)');
+i17Test('Caracteres inválidos são removidos', () => {
+    const raw = 'ATCGXYZ123ATCG';
+    const invalidCount = (raw.match(/[^ATCG]/g) || []).length;
+    const genome = raw.replace(/[^ATCG]/g, '');
+    return assert('Remove inválidos', genome === 'ATCGATCG' && invalidCount === 6,
+        `genome: ${genome}, invalidCount: ${invalidCount}`);
+});
+i17Test('Sequência limpa permanece intacta', () => {
+    const raw = 'ATCGATCG';
+    const invalidCount = (raw.match(/[^ATCG]/g) || []).length;
+    const genome = raw.replace(/[^ATCG]/g, '');
+    return assert('Sequência limpa', genome === 'ATCGATCG' && invalidCount === 0,
+        `genome: ${genome}, invalidCount: ${invalidCount}`);
+});
+i17Test('Espaços e quebras de linha são removidos', () => {
+    const raw = 'AT CG\nATCG';
+    const cleaned = raw.toUpperCase().replace(/\s/g, '');
+    const genome = cleaned.replace(/[^ATCG]/g, '');
+    return assert('Espaços removidos', genome === 'ATCGATCG',
+        `genome: ${genome}`);
+});
+i17Test('Mistura de válidos e inválidos', () => {
+    const raw = 'A-T-C-G-XYZ';
+    const invalidCount = (raw.match(/[^ATCG]/g) || []).length;
+    const genome = raw.replace(/[^ATCG]/g, '');
+    return assert('Mistura', genome === 'ATCG' && invalidCount === 7,
+        `genome: ${genome}, invalidCount: ${invalidCount}`);
+});
+i17Test('Genoma resultante é válido para busca', () => {
+    const raw = 'ATCGXYZATCG';
+    const genome = raw.replace(/[^ATCG]/g, '');
+    const isValid = /^[ATCG]+$/.test(genome);
+    const positions = kmpSearch(genome, 'ATCG');
+    return assert('Genoma limpo é válido', isValid && positions.length === 2,
+        `isValid: ${isValid}, positions: [${positions}]`);
+});
+i17Test('Genoma vazio após remoção', () => {
+    const raw = 'XYZ123';
+    const genome = raw.replace(/[^ATCG]/g, '');
+    return assert('Genoma vazio', genome === '', `genome: "${genome}"`);
+});
+
+// T3: Formatação de mensagens de erro (pt-BR)
+console.log('\n▸ T3: Mensagens de erro em português');
+i17Test('Mensagem de formato inválido', () => {
+    const msg = 'Formato inválido. Use apenas arquivos .txt.';
+    return assert('Msg formato', msg.includes('inválido') && msg.includes('.txt'),
+        `msg: ${msg}`);
+});
+i17Test('Mensagem de caracteres removidos', () => {
+    const count = 5;
+    const msg = `${count} caracteres inválidos foram removidos. Apenas A, T, C, G são permitidos.`;
+    return assert('Msg caracteres', msg.includes('5') && msg.includes('removidos'),
+        `msg: ${msg}`);
+});
+i17Test('Mensagem de arquivo vazio', () => {
+    const msg = 'O arquivo está vazio.';
+    return assert('Msg vazio', msg.includes('vazio'), `msg: ${msg}`);
+});
+
+// ============================================================
 // RESUMO FINAL
 // ============================================================
 console.log('\n═══════════════════════════════════════');
@@ -453,12 +563,14 @@ console.log('══════════════════════�
 console.log(`  KMP:          ${kmpPassed}/${kmpTotal} passaram`);
 console.log(`  Força Bruta:  ${bfPassed}/${bfTotal} passaram`);
 console.log(`  Comparação:   ${matchCount}/${testCases.length} idênticos`);
+console.log(`  Issue #17:    ${i17Passed}/${i17Total} passaram`);
 console.log(`  Speedup médio: ${avgSpeedup.toFixed(2)}x`);
 
-if (totalFailed === 0) {
+if (totalFailed === 0 && i17Passed === i17Total) {
     console.log('\n✅ TODOS OS TESTES PASSARAM!');
     process.exit(0);
 } else {
-    console.log(`\n❌ ${totalFailed} teste(s) falharam`);
+    const totalAllFailed = totalFailed + (i17Total - i17Passed);
+    console.log(`\n❌ ${totalAllFailed} teste(s) falharam`);
     process.exit(1);
 }

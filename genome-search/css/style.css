@@ -448,6 +448,64 @@ button:disabled {
     border: 0;
 }
 
+/* ============================================================
+   SPINNER & LOADING STATES
+   ============================================================ */
+
+/* Rotating spinner */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+    border: 2px solid rgba(0, 240, 154, 0.3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Overlay during search — dims the search panel */
+.loading-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 17, 31, 0.7);
+    z-index: 10;
+    place-items: center;
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+
+.is-loading .loading-overlay {
+    display: grid;
+}
+
+/* Search panel needs positioning context for overlay */
+.search-panel {
+    position: relative;
+}
+
+/* Global loading state — dims search area */
+body.is-loading .search-panel {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+body.is-loading .upload-zone {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Warning feedback style */
+.feedback.warning {
+    color: #ffb31a;
+}
+
 .app-footer {
     margin-top: 28px;
     padding-top: 18px;
