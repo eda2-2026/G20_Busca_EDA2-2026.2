@@ -34,24 +34,18 @@ function measureTime(fn, ...args) {
  * Roda cada algoritmo alternadamente para evitar bias do JIT
  * @param {Function} fnA - Primeiro algoritmo
  * @param {Function} fnB - Segundo algoritmo
- * @param {number} rounds - Número de rodadas (default: 10)
+ * @param {number} rounds - Número de rodadas (default: 20)
  * @param {...*} args - Argumentos para ambos
  * @returns {{ resultA: *, resultB: *, timeA: number, timeB: number }}
  */
 function compareAlgorithms(fnA, fnB, rounds, ...args) {
-    if (typeof rounds !== 'number' || rounds < 1) rounds = 10;
+    if (typeof rounds !== 'number' || rounds < 1) rounds = 20;
 
     const timesA = [];
     const timesB = [];
     let resultA, resultB;
 
-    // Warmup alternado (3 pares)
-    for (let w = 0; w < 3; w++) {
-        fnA(...args);
-        fnB(...args);
-    }
-
-    // Medir alternadamente para公平
+    // Medir alternadamente para justiça
     for (let i = 0; i < rounds; i++) {
         const startA = performance.now();
         resultA = fnA(...args);
@@ -67,11 +61,19 @@ function compareAlgorithms(fnA, fnB, rounds, ...args) {
     timesA.sort((a, b) => a - b);
     timesB.sort((a, b) => a - b);
 
+    // Remover os 25% mais lentos e os 25% mais rápidos (interquartil)
+    const trim = Math.floor(rounds * 0.25);
+    const trimmedA = timesA.slice(trim, rounds - trim);
+    const trimmedB = timesB.slice(trim, rounds - trim);
+
+    const avgA = trimmedA.reduce((a, b) => a + b, 0) / trimmedA.length;
+    const avgB = trimmedB.reduce((a, b) => a + b, 0) / trimmedB.length;
+
     return {
         resultA,
         resultB,
-        timeA: timesA[Math.floor(timesA.length / 2)],
-        timeB: timesB[Math.floor(timesB.length / 2)]
+        timeA: avgA,
+        timeB: avgB
     };
 }
 
