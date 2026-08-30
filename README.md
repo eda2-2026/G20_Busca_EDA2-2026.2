@@ -56,27 +56,25 @@
 
 ### Dados de exemplo
 
-O projeto inclui arquivos de genoma prontos para teste na pasta `genome-search/dados/`:
+O projeto inclui um arquivo de genoma para teste:
 
-| Arquivo             | Tamanho | Descrição                 |
-| ------------------- | ------: | ------------------------- |
-| `genoma_small.txt`  |   Pequeno | Genoma pequeno para testes rápidos |
-| `genoma_medium.txt` |  100 KB  | Genoma médio              |
-| `genoma_ecoli.txt`  |    5 MB  | Genoma completo da *E. coli* |
+| Arquivo            | Tamanho | Padrão de teste           | Ocorrências |
+| ------------------ | ------: | ------------------------- | ----------: |
+| `genome_5mb.txt`   |   5 MB  | `ACGTACGTTGCA` (12 bases) |          11 |
 
 ## Screenshots (demonstração)
 
 ### Tela principal
 
-![Interface principal](genome-search/screenshots/upload.png)
+![Interface principal](Prints/Captura%20de%20Tela%20(415).png)
 
-### Resultado da busca
+### Genoma carregado
 
-![Resultado da busca](genome-search/screenshots/search.png)
+![Genoma 5MB carregado](Prints/Captura%20de%20Tela%20(416).png)
 
-### Comparação de performance
+### Resultado e performance
 
-![Performance KMP vs Força Bruta](genome-search/screenshots/performance.png)
+![Resultado KMP vs Força Bruta](Prints/Captura%20de%20Tela%20(417).png)
 
 ## Algoritmos implementados
 
