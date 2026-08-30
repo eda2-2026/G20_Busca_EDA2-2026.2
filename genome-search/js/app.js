@@ -26,6 +26,20 @@ function getElements() {
     elements.searchFeedback = document.getElementById('search-feedback');
     elements.searchButton = document.getElementById('search-button');
     elements.searchForm = document.getElementById('search-form');
+    elements.resultsPanel = document.getElementById('results-panel');
+    elements.performancePanel = document.getElementById('performance-panel');
+    elements.genomeView = document.getElementById('genome-view');
+    elements.renderFeedback = document.getElementById('render-feedback');
+    elements.matchTotal = document.getElementById('match-total');
+    elements.positionsList = document.getElementById('positions-list');
+    elements.kmpBar = document.getElementById('kmp-bar');
+    elements.bruteBar = document.getElementById('brute-bar');
+    elements.kmpTime = document.getElementById('kmp-time');
+    elements.bruteTime = document.getElementById('brute-time');
+    elements.kmpCardTime = document.getElementById('kmp-card-time');
+    elements.bruteCardTime = document.getElementById('brute-card-time');
+    elements.speedupValue = document.getElementById('speedup-value');
+    elements.speedupLabel = document.getElementById('speedup-label');
 }
 
 function cleanDNA(value) {
@@ -42,6 +56,20 @@ function setFeedback(element, message, type = '') {
     element.textContent = message;
     element.classList.remove('error', 'success');
     if (type) element.classList.add(type);
+}
+
+function clearResults() {
+    state.results = null;
+    state.performance = null;
+
+    if (!elements.resultsPanel || !elements.performancePanel) return;
+
+    elements.resultsPanel.classList.add('is-hidden');
+    elements.performancePanel.classList.add('is-hidden');
+    elements.genomeView.textContent = '';
+    elements.positionsList.textContent = '';
+    elements.matchTotal.textContent = '0 matches';
+    setFeedback(elements.renderFeedback, '');
 }
 
 function validatePattern() {
@@ -106,6 +134,7 @@ function loadGenomeFile(file) {
         if (!genome) {
             state.genome = '';
             state.fileName = '';
+            clearResults();
             elements.fileInfo.classList.add('is-hidden');
             setFeedback(elements.fileFeedback, 'O arquivo está vazio.', 'error');
             updateSearchState();
@@ -115,6 +144,7 @@ function loadGenomeFile(file) {
         if (!/^[ATCG]+$/.test(genome)) {
             state.genome = '';
             state.fileName = '';
+            clearResults();
             elements.fileInfo.classList.add('is-hidden');
             setFeedback(
                 elements.fileFeedback,
@@ -127,6 +157,7 @@ function loadGenomeFile(file) {
 
         state.genome = genome;
         state.fileName = file.name;
+        clearResults();
         showFileInfo(file, genome);
         setFeedback(elements.fileFeedback, 'Genoma carregado com sucesso.', 'success');
         setFeedback(elements.searchFeedback, '');
@@ -136,6 +167,7 @@ function loadGenomeFile(file) {
     reader.onerror = function onError() {
         state.genome = '';
         state.fileName = '';
+        clearResults();
         elements.fileInfo.classList.add('is-hidden');
         setFeedback(elements.fileFeedback, 'Não foi possível ler o arquivo.', 'error');
         updateSearchState();
@@ -150,8 +182,139 @@ function handlePatternInput(event) {
 
     state.pattern = normalized;
     event.target.value = normalized;
+    clearResults();
     setFeedback(elements.searchFeedback, '');
     updateSearchState();
+}
+
+function getRenderWindow(positions) {
+    const maxVisibleBases = 5000;
+
+    if (state.genome.length <= maxVisibleBases) {
+        return { start: 0, end: state.genome.length };
+    }
+
+    if (positions.length === 0) {
+        return { start: 0, end: maxVisibleBases };
+    }
+
+    const firstMatch = positions[0];
+    const start = Math.max(0, firstMatch - 120);
+    const end = Math.min(state.genome.length, start + maxVisibleBases);
+    return { start, end };
+}
+
+function buildHighlightedRanges(positions, start, end) {
+    const highlighted = new Set();
+
+    positions.forEach(function addRange(position) {
+        const matchStart = position;
+        const matchEnd = position + state.pattern.length;
+
+        if (matchEnd <= start || matchStart >= end) return;
+
+        for (let index = Math.max(matchStart, start); index < Math.min(matchEnd, end); index++) {
+            highlighted.add(index);
+        }
+    });
+
+    return highlighted;
+}
+
+function renderGenome(positions) {
+    const windowRange = getRenderWindow(positions);
+    const highlighted = buildHighlightedRanges(positions, windowRange.start, windowRange.end);
+    const fragment = document.createDocumentFragment();
+
+    elements.genomeView.textContent = '';
+
+    for (let index = windowRange.start; index < windowRange.end; index++) {
+        const base = state.genome[index];
+        const span = document.createElement('span');
+        span.className = `base base-${base.toLowerCase()}`;
+        span.textContent = base;
+
+        if (highlighted.has(index)) {
+            span.classList.add('match');
+            span.title = `Posicao ${index + 1}`;
+        }
+
+        fragment.appendChild(span);
+    }
+
+    elements.genomeView.appendChild(fragment);
+
+    if (state.genome.length > windowRange.end || windowRange.start > 0) {
+        setFeedback(
+            elements.renderFeedback,
+            `Mostrando bases ${windowRange.start + 1} a ${windowRange.end} de ${state.genome.length.toLocaleString('pt-BR')}.`
+        );
+    } else {
+        setFeedback(elements.renderFeedback, '');
+    }
+}
+
+function renderPositions(positions) {
+    elements.positionsList.textContent = '';
+
+    if (positions.length === 0) {
+        const message = document.createElement('p');
+        message.className = 'empty-result';
+        message.textContent = 'Padrao nao encontrado no genoma carregado.';
+        elements.positionsList.appendChild(message);
+        return;
+    }
+
+    const maxVisiblePositions = 200;
+    const fragment = document.createDocumentFragment();
+
+    positions.slice(0, maxVisiblePositions).forEach(function addPosition(position) {
+        const pill = document.createElement('span');
+        pill.className = 'position-pill';
+        pill.textContent = String(position + 1);
+        fragment.appendChild(pill);
+    });
+
+    if (positions.length > maxVisiblePositions) {
+        const extra = document.createElement('span');
+        extra.className = 'empty-result';
+        extra.textContent = `+ ${positions.length - maxVisiblePositions} posicoes`;
+        fragment.appendChild(extra);
+    }
+
+    elements.positionsList.appendChild(fragment);
+}
+
+function renderResults(positions) {
+    elements.resultsPanel.classList.remove('is-hidden');
+    elements.matchTotal.textContent = `${positions.length.toLocaleString('pt-BR')} ${positions.length === 1 ? 'match' : 'matches'}`;
+
+    renderGenome(positions);
+    renderPositions(positions);
+}
+
+function renderPerformance(kmpTimeValue, bruteTimeValue) {
+    const maxTime = Math.max(kmpTimeValue, bruteTimeValue, 0.001);
+    const kmpWidth = Math.max(4, (kmpTimeValue / maxTime) * 100);
+    const bruteWidth = Math.max(4, (bruteTimeValue / maxTime) * 100);
+    const speedup = bruteTimeValue / Math.max(kmpTimeValue, 0.001);
+
+    elements.performancePanel.classList.remove('is-hidden');
+    elements.kmpBar.style.width = `${kmpWidth}%`;
+    elements.bruteBar.style.width = `${bruteWidth}%`;
+
+    elements.kmpTime.textContent = formatTime(kmpTimeValue);
+    elements.bruteTime.textContent = formatTime(bruteTimeValue);
+    elements.kmpCardTime.textContent = formatTime(kmpTimeValue);
+    elements.bruteCardTime.textContent = formatTime(bruteTimeValue);
+
+    if (speedup >= 1) {
+        elements.speedupValue.textContent = `${speedup.toFixed(1)}x faster`;
+        elements.speedupLabel.textContent = 'KMP foi mais rapido que Forca Bruta para este padrao.';
+    } else {
+        elements.speedupValue.textContent = `${(1 / speedup).toFixed(1)}x slower`;
+        elements.speedupLabel.textContent = 'KMP nao superou Forca Bruta nesta execucao.';
+    }
 }
 
 function handleSearch(event) {
@@ -159,9 +322,23 @@ function handleSearch(event) {
 
     if (elements.searchButton.disabled) return;
 
+    const kmpMeasurement = measureTime(kmpSearch, state.genome, state.pattern);
+    const bruteMeasurement = measureTime(bruteForceSearch, state.genome, state.pattern);
+
+    state.results = kmpMeasurement.result;
+    state.performance = {
+        kmp: kmpMeasurement.time,
+        bruteForce: bruteMeasurement.time
+    };
+
+    renderResults(state.results);
+    renderPerformance(state.performance.kmp, state.performance.bruteForce);
+
     setFeedback(
         elements.searchFeedback,
-        `Fluxo básico validado: "${state.pattern}" pode ser buscado em ${state.fileName}.`,
+        state.results.length > 0
+            ? `Busca concluida: ${state.results.length.toLocaleString('pt-BR')} ocorrencia(s) encontrada(s).`
+            : 'Busca concluida: padrao nao encontrado.',
         'success'
     );
 }

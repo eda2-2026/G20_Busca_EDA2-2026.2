@@ -57,6 +57,64 @@
             </form>
         </section>
 
+        <section class="panel results-panel is-hidden" id="results-panel" aria-labelledby="results-title">
+            <div class="section-title">
+                <span aria-hidden="true">#</span>
+                <h2 id="results-title">Results</h2>
+            </div>
+
+            <div class="genome-view" id="genome-view" aria-label="Genome visualization"></div>
+            <p class="feedback" id="render-feedback" aria-live="polite"></p>
+
+            <div class="result-summary">
+                <span>Found: <strong id="match-total">0 matches</strong></span>
+                <span>Positions:</span>
+            </div>
+            <div class="positions-list" id="positions-list" aria-live="polite"></div>
+        </section>
+
+        <section class="panel performance-panel is-hidden" id="performance-panel" aria-labelledby="performance-title">
+            <div class="section-title">
+                <span aria-hidden="true">></span>
+                <h2 id="performance-title">Performance</h2>
+            </div>
+
+            <div class="perf-bars">
+                <div class="perf-row">
+                    <span>KMP</span>
+                    <div class="perf-track">
+                        <div class="perf-fill kmp" id="kmp-bar"></div>
+                    </div>
+                    <strong id="kmp-time">0.000 ms</strong>
+                </div>
+                <div class="perf-row">
+                    <span>Brute Force</span>
+                    <div class="perf-track">
+                        <div class="perf-fill brute" id="brute-bar"></div>
+                    </div>
+                    <strong id="brute-time">0.000 ms</strong>
+                </div>
+            </div>
+
+            <div class="perf-cards">
+                <article class="perf-card kmp-card">
+                    <h3>KMP Algorithm</h3>
+                    <span>Execution Time</span>
+                    <strong id="kmp-card-time">0.000 ms</strong>
+                </article>
+                <article class="perf-card brute-card">
+                    <h3>Brute Force</h3>
+                    <span>Execution Time</span>
+                    <strong id="brute-card-time">0.000 ms</strong>
+                </article>
+            </div>
+
+            <div class="speedup-card">
+                <strong id="speedup-value">0x faster</strong>
+                <span id="speedup-label">Run a search to compare both algorithms.</span>
+            </div>
+        </section>
+
         <footer class="app-footer">
             Desenvolvido por G20 - Estrutura de Dados 2 - 2026.2
         </footer>
