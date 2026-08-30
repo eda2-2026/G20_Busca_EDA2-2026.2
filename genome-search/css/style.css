@@ -186,6 +186,7 @@ input[type="text"] {
 
 input[type="text"]:focus {
     border-color: var(--accent-2);
+    box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.25);
 }
 
 button {
@@ -196,6 +197,21 @@ button {
     cursor: pointer;
     font-weight: 700;
     text-transform: uppercase;
+    transition: background-color 160ms ease, transform 100ms ease;
+}
+
+button:hover:not(:disabled) {
+    background: #00d488;
+    transform: translateY(-1px);
+}
+
+button:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+}
+
+button:active:not(:disabled) {
+    transform: translateY(0);
 }
 
 button:disabled {
@@ -329,15 +345,33 @@ button:disabled {
 }
 
 .perf-track {
-    height: 22px;
+    position: relative;
+    height: 28px;
     overflow: hidden;
     background: var(--panel-dark);
+    border: 1px solid rgba(36, 65, 100, 0.5);
 }
 
 .perf-fill {
+    position: relative;
     width: 0;
     height: 100%;
-    transition: width 180ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    transition: width 400ms ease-out;
+}
+
+.perf-fill::after {
+    content: attr(data-time);
+    position: absolute;
+    right: 8px;
+    color: #03130d;
+    font-family: "Courier New", monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .perf-fill.kmp {
@@ -432,6 +466,64 @@ button:disabled {
     border: 0;
 }
 
+/* ============================================================
+   SPINNER & LOADING STATES
+   ============================================================ */
+
+/* Rotating spinner */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+    border: 2px solid rgba(0, 240, 154, 0.3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Overlay during search — dims the search panel */
+.loading-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 17, 31, 0.7);
+    z-index: 10;
+    place-items: center;
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+
+.is-loading .loading-overlay {
+    display: grid;
+}
+
+/* Search panel needs positioning context for overlay */
+.search-panel {
+    position: relative;
+}
+
+/* Global loading state — dims search area */
+body.is-loading .search-panel {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+body.is-loading .upload-zone {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Warning feedback style */
+.feedback.warning {
+    color: #ffb31a;
+}
+
 .app-footer {
     margin-top: 28px;
     padding-top: 18px;
@@ -439,6 +531,58 @@ button:disabled {
     color: var(--muted);
     font-size: 0.8rem;
     text-align: center;
+}
+
+/* ============================================================
+   ANIMAÇÕES
+   ============================================================ */
+
+/* DNA helix background - movimento sutil nas linhas diagonais */
+@keyframes dna-shift {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 60px 0, -40px 0; }
+}
+
+body {
+    animation: dna-shift 12s linear infinite;
+    background-size: 60px 60px, 40px 40px;
+}
+
+/* Pulse no genoma quando há matches */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(0, 240, 154, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(0, 240, 154, 0.9); }
+}
+
+.base.match {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Slide-in para painéis de resultados */
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-panel,
+.performance-panel {
+    animation: slide-in 300ms ease-out;
+}
+
+/* Speedup card pulse */
+@keyframes speedup-pulse {
+    0%, 100% { border-color: var(--accent); }
+    50% { border-color: var(--accent-2); }
+}
+
+.speedup-card {
+    animation: speedup-pulse 3s ease-in-out infinite;
 }
 
 @media (max-width: 640px) {

@@ -570,41 +570,18 @@
             const text = generateDNA(size.textLen);
             const pattern = text.substring(Math.floor(size.textLen / 2), Math.floor(size.textLen / 2) + size.patternLen);
 
-            // Warmup
-            kmpSearch(text.substring(0, 1000), pattern.substring(0, Math.min(4, pattern.length)));
-            bruteForceSearch(text.substring(0, 1000), pattern.substring(0, Math.min(4, pattern.length)));
+            // Medição justa: alternar KMP e BF
+            const cmp = compareAlgorithms(kmpSearch, bruteForceSearch, 10, text, pattern);
 
-            // KMP: rodar 10 vezes e pegar a mediana
-            const kmpTimes = [];
-            let kmpResult;
-            for (let r = 0; r < 10; r++) {
-                const t = measureTime(kmpSearch, text, pattern);
-                kmpTimes.push(t.time);
-                kmpResult = t.result;
-            }
-            kmpTimes.sort((a, b) => a - b);
-            const kmpMedian = kmpTimes[4]; // mediana
-
-            // Força Bruta: rodar 10 vezes e pegar a mediana
-            const bfTimes = [];
-            let bfResult;
-            for (let r = 0; r < 10; r++) {
-                const t = measureTime(bruteForceSearch, text, pattern);
-                bfTimes.push(t.time);
-                bfResult = t.result;
-            }
-            bfTimes.sort((a, b) => a - b);
-            const bfMedian = bfTimes[4];
-
-            const speedup = bfMedian / kmpMedian;
+            const speedup = cmp.timeB / cmp.timeA;
             speedups.push(speedup);
 
             log(outputId, `  Texto: ${size.textLen.toLocaleString()} chars | Padrão: ${size.patternLen} chars`);
-            log(outputId, `  KMP:           ${formatTime(kmpMedian)} (mediana de 10)`, 'performance');
-            log(outputId, `  Força Bruta:   ${formatTime(bfMedian)} (mediana de 10)`, 'performance');
+            log(outputId, `  KMP:           ${formatTime(cmp.timeA)} (mediana de 10)`, 'performance');
+            log(outputId, `  Força Bruta:   ${formatTime(cmp.timeB)} (mediana de 10)`, 'performance');
             log(outputId, `  Speedup:       ${speedup.toFixed(2)}x`, speedup > 1 ? 'success' : 'error');
-            log(outputId, `  Resultados iguais: ${arrayEquals(kmpResult, bfResult) ? '✅' : '❌'}`,
-                arrayEquals(kmpResult, bfResult) ? 'success' : 'error');
+            log(outputId, `  Resultados iguais: ${arrayEquals(cmp.resultA, cmp.resultB) ? '✅' : '❌'}`,
+                arrayEquals(cmp.resultA, cmp.resultB) ? 'success' : 'error');
         });
 
         // Resumo
@@ -664,15 +641,15 @@
         // Teste com genoma sintético grande
         log(outputId, '\n▸ Genoma sintético grande (200K chars)');
         const syntheticDNA = 'ATCG'.repeat(25000) + 'GCTA'.repeat(25000);
-        const synthKMP = measureTime(kmpSearch, syntheticDNA, 'ATCG');
-        const synthBF = measureTime(bruteForceSearch, syntheticDNA, 'ATCG');
+        const synthCmp = compareAlgorithms(kmpSearch, bruteForceSearch, 10, syntheticDNA, 'ATCG');
+        const synthSpeedup = synthCmp.timeB / synthCmp.timeA;
 
         log(outputId,  `  Tamanho: ${syntheticDNA.length.toLocaleString()} chars`);
-        log(outputId,  `  KMP: ${synthKMP.result.length} ocorrências em ${formatTime(synthKMP.time)}`, 'performance');
-        log(outputId,  `  FB:  ${synthBF.result.length} ocorrências em ${formatTime(synthBF.time)}`, 'performance');
-        log(outputId,  `  Speedup: ${(synthBF.time / synthKMP.time).toFixed(2)}x`, 'success');
+        log(outputId,  `  KMP: ${synthCmp.resultA.length} ocorrências em ${formatTime(synthCmp.timeA)}`, 'performance');
+        log(outputId,  `  FB:  ${synthCmp.resultB.length} ocorrências em ${formatTime(synthCmp.timeB)}`, 'performance');
+        log(outputId,  `  Speedup: ${synthSpeedup.toFixed(2)}x`, synthSpeedup > 1 ? 'success' : 'error');
 
-        const synthMatch = arrayEquals(synthKMP.result, synthBF.result);
+        const synthMatch = arrayEquals(synthCmp.resultA, synthCmp.resultB);
         assert(outputId, 'Genoma sintético: resultados iguais', synthMatch);
 
         log(outputId, '\n═══════════════════════════════════════');

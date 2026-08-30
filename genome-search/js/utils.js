@@ -30,16 +30,68 @@ function measureTime(fn, ...args) {
 }
 
 /**
- * Formatar tempo em ms
+ * Comparar dois algoritmos com múltiplas rodadas
+ * Roda cada algoritmo alternadamente para evitar bias do JIT
+ * @param {Function} fnA - Primeiro algoritmo
+ * @param {Function} fnB - Segundo algoritmo
+ * @param {number} rounds - Número de rodadas (default: 20)
+ * @param {...*} args - Argumentos para ambos
+ * @returns {{ resultA: *, resultB: *, timeA: number, timeB: number }}
+ */
+function compareAlgorithms(fnA, fnB, rounds, ...args) {
+    if (typeof rounds !== 'number' || rounds < 1) rounds = 20;
+
+    const timesA = [];
+    const timesB = [];
+    let resultA, resultB;
+
+    // Medir alternadamente para justiça
+    for (let i = 0; i < rounds; i++) {
+        const startA = performance.now();
+        resultA = fnA(...args);
+        const endA = performance.now();
+        timesA.push(endA - startA);
+
+        const startB = performance.now();
+        resultB = fnB(...args);
+        const endB = performance.now();
+        timesB.push(endB - startB);
+    }
+
+    timesA.sort((a, b) => a - b);
+    timesB.sort((a, b) => a - b);
+
+    // Remover os 25% mais lentos e os 25% mais rápidos (interquartil)
+    const trim = Math.floor(rounds * 0.25);
+    const trimmedA = timesA.slice(trim, rounds - trim);
+    const trimmedB = timesB.slice(trim, rounds - trim);
+
+    const avgA = trimmedA.reduce((a, b) => a + b, 0) / trimmedA.length;
+    const avgB = trimmedB.reduce((a, b) => a + b, 0) / trimmedB.length;
+
+    return {
+        resultA,
+        resultB,
+        timeA: avgA,
+        timeB: avgB
+    };
+}
+
+/**
+ * Formatar tempo em ms com escala adaptativa
  * @param {number} ms - Tempo em milissegundos
- * @returns {string} Tempo formatado (ex: '0.002 ms', '1.500 ms')
+ * @returns {string} Tempo formatado
  */
 function formatTime(ms) {
-    if (typeof ms !== 'number' || isNaN(ms)) return '0.000 ms';
-    return ms.toFixed(3) + ' ms';
+    if (typeof ms !== 'number' || isNaN(ms)) return '0 ms';
+    if (ms < 0.001) return (ms * 1000).toFixed(1) + ' µs';
+    if (ms < 1) return ms.toFixed(3) + ' ms';
+    if (ms < 10) return ms.toFixed(2) + ' ms';
+    return ms.toFixed(1) + ' ms';
 }
 
 // Exportar funções
 window.isValidDNA = isValidDNA;
 window.measureTime = measureTime;
+window.compareAlgorithms = compareAlgorithms;
 window.formatTime = formatTime;
