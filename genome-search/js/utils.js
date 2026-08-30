@@ -17,36 +17,62 @@ function isValidDNA(sequence) {
 }
 
 /**
- * Medir tempo de execução com warmup e múltiplas execuções
+ * Medir tempo de execução
  * @param {Function} fn - Função a medir
- * @param {number} iterations - Número de iterações (default: 5)
  * @param {...*} args - Argumentos da função
- * @returns {{ result: *, time: number }} Resultado e mediana dos tempos em ms
+ * @returns {{ result: *, time: number }} Resultado e tempo em ms
  */
-function measureTime(fn, iterations, ...args) {
-    if (typeof iterations !== 'number' || iterations < 1) {
-        iterations = 5;
-    }
+function measureTime(fn, ...args) {
+    const start = performance.now();
+    const result = fn(...args);
+    const end = performance.now();
+    return { result, time: end - start };
+}
 
-    // Warmup: executar 3 vezes para aquecer o JIT
+/**
+ * Comparar dois algoritmos com múltiplas rodadas
+ * Roda cada algoritmo alternadamente para evitar bias do JIT
+ * @param {Function} fnA - Primeiro algoritmo
+ * @param {Function} fnB - Segundo algoritmo
+ * @param {number} rounds - Número de rodadas (default: 10)
+ * @param {...*} args - Argumentos para ambos
+ * @returns {{ resultA: *, resultB: *, timeA: number, timeB: number }}
+ */
+function compareAlgorithms(fnA, fnB, rounds, ...args) {
+    if (typeof rounds !== 'number' || rounds < 1) rounds = 10;
+
+    const timesA = [];
+    const timesB = [];
+    let resultA, resultB;
+
+    // Warmup alternado (3 pares)
     for (let w = 0; w < 3; w++) {
-        fn(...args);
+        fnA(...args);
+        fnB(...args);
     }
 
-    // Medir múltiplas vezes e pegar a mediana
-    const times = [];
-    let result;
+    // Medir alternadamente para公平
+    for (let i = 0; i < rounds; i++) {
+        const startA = performance.now();
+        resultA = fnA(...args);
+        const endA = performance.now();
+        timesA.push(endA - startA);
 
-    for (let i = 0; i < iterations; i++) {
-        const start = performance.now();
-        result = fn(...args);
-        const end = performance.now();
-        times.push(end - start);
+        const startB = performance.now();
+        resultB = fnB(...args);
+        const endB = performance.now();
+        timesB.push(endB - startB);
     }
 
-    times.sort((a, b) => a - b);
-    const median = times[Math.floor(times.length / 2)];
-    return { result, time: median };
+    timesA.sort((a, b) => a - b);
+    timesB.sort((a, b) => a - b);
+
+    return {
+        resultA,
+        resultB,
+        timeA: timesA[Math.floor(timesA.length / 2)],
+        timeB: timesB[Math.floor(timesB.length / 2)]
+    };
 }
 
 /**
@@ -65,4 +91,5 @@ function formatTime(ms) {
 // Exportar funções
 window.isValidDNA = isValidDNA;
 window.measureTime = measureTime;
+window.compareAlgorithms = compareAlgorithms;
 window.formatTime = formatTime;

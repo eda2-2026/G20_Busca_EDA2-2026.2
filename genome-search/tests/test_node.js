@@ -401,7 +401,7 @@ sizes.forEach((size, i) => {
     const kmpTimes = [];
     let kmpResult;
     for (let r = 0; r < 10; r++) {
-        const t = measureTime(kmpSearch, 10, text, pattern);
+        const t = measureTime(kmpSearch, text, pattern);
         kmpTimes.push(t.time);
         kmpResult = t.result;
     }
@@ -412,7 +412,7 @@ sizes.forEach((size, i) => {
     const bfTimes = [];
     let bfResult;
     for (let r = 0; r < 10; r++) {
-        const t = measureTime(bruteForceSearch, 10, text, pattern);
+        const t = measureTime(bruteForceSearch, text, pattern);
         bfTimes.push(t.time);
         bfResult = t.result;
     }

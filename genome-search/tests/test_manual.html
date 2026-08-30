@@ -578,7 +578,7 @@
             const kmpTimes = [];
             let kmpResult;
             for (let r = 0; r < 10; r++) {
-                const t = measureTime(kmpSearch, 1, text, pattern);
+                const t = measureTime(kmpSearch, text, pattern);
                 kmpTimes.push(t.time);
                 kmpResult = t.result;
             }
@@ -589,7 +589,7 @@
             const bfTimes = [];
             let bfResult;
             for (let r = 0; r < 10; r++) {
-                const t = measureTime(bruteForceSearch, 1, text, pattern);
+                const t = measureTime(bruteForceSearch, text, pattern);
                 bfTimes.push(t.time);
                 bfResult = t.result;
             }
@@ -664,8 +664,8 @@
         // Teste com genoma sintético grande
         log(outputId, '\n▸ Genoma sintético grande (200K chars)');
         const syntheticDNA = 'ATCG'.repeat(25000) + 'GCTA'.repeat(25000);
-        const synthKMP = measureTime(kmpSearch, 5, syntheticDNA, 'ATCG');
-        const synthBF = measureTime(bruteForceSearch, 5, syntheticDNA, 'ATCG');
+        const synthKMP = measureTime(kmpSearch, syntheticDNA, 'ATCG');
+        const synthBF = measureTime(bruteForceSearch, syntheticDNA, 'ATCG');
 
         log(outputId,  `  Tamanho: ${syntheticDNA.length.toLocaleString()} chars`);
         log(outputId,  `  KMP: ${synthKMP.result.length} ocorrências em ${formatTime(synthKMP.time)}`, 'performance');
