@@ -179,7 +179,7 @@ node generate_ecoli.js
 
 ## Vídeo (demonstração)
 
-[Apresentação G20 - Busca 2026.2](https://youtu.be/linkaqui)
+[Apresentação G20 - Busca 2026.2](https://youtu.be/rfAs2Bd7gYo)
 
 ## Créditos e referências
 
